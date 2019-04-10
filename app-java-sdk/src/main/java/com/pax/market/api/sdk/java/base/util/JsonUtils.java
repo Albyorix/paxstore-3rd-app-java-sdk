@@ -12,8 +12,16 @@
 package com.pax.market.api.sdk.java.base.util;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.pax.market.api.sdk.java.base.constant.ResultCode;
 import com.pax.market.api.sdk.java.base.dto.SdkObject;
+
+import java.lang.reflect.Type;
+import java.util.Date;
 
 
 /**
@@ -31,7 +39,14 @@ public class JsonUtils {
         if (gson == null) {
             synchronized (Gson.class) {
                 if (gson == null) {
-                    gson = new Gson();
+                    gson = new GsonBuilder()
+                            .registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+                                @Override
+                                public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                                    return new Date(json.getAsJsonPrimitive().getAsLong());
+                                }
+                            })
+                            .serializeNulls().create();
                 }
             }
         }
@@ -58,6 +73,10 @@ public class JsonUtils {
      */
     public static <T> T fromJson(String sdkJsonStr, Class<T> clazz) {
         return gson.fromJson(sdkJsonStr, clazz);
+    }
+
+    public static <T> T fromJson(String sdkJsonStr, Type typeOfT) {
+        return gson.fromJson(sdkJsonStr, typeOfT);
     }
 
     /**
