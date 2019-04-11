@@ -2,34 +2,43 @@
 
 PAXSTORE 3rd App Java SDK provides the basic java APIs for third party developers to integrate their apps on PAXSTORE.
 
-## Download Dependency
+## Integrate with SDK
 
-Gradle:
+Gradle:<br/>
+```
+implementation 'com.pax.market:paxstore-3rd-app-java-sdk:6.3'
+```
 
-    implementation 'com.pax.market:paxstore-3rd-app-java-sdk:6.2'
+Maven:<br/>
+```
+<dependency>
+    <groupId>com.pax.market</groupId>
+    <artifactId>paxstore-3rd-app-java-sdk/</artifactId>
+    <version>6.3</version>
+</dependency>
+```
 
-## API Usage
+## Sample Code
+```
+public class Sample {
 
-### Download param(Optional, ignore this part if you don't have download parameter requirement)
-    String packageName = context.getPackageName();
-    int versionCode = context.getPackageManager().getPackageInfo(packageName, 0).versionCode;
-    String saveFilePath = getFilesDir() + "/YourPath/";                                                             //Specifies the download path for the parameter file
+	private String BASEURL = "https://api.whatspos.com/p-market-api";
+	private String KEY = "YOUR APP KEY";
+	private String SECRET = "YOUR APP SECRET";
 
-    ParamApi paramApi = new ParamApi(apiUrl, appKey, appSecret, terminalSerialNo)
-    paramApi.downloadParamToPath(getApplication().getPackageName(), BuildConfig.VERSION_CODE, saveFilePath);
+	public SdkPageObject<TerminalLocation> getGeolocation(List<String> serialNos) {
+        TerminalApi terminalApi = new TerminalApi(BASEURL, KEY, SECRET);
+        SdkPageObject<TerminalLocation> geolocations = terminalApi.getGeolocation(serialNos);
+    	return geolocations;
+	}
+}
+```
 
-### Upload subsidiary device information(subsidiary device info or application info)
-    TerminalSyncInfo terminalSyncInfo = new TerminalSyncInfo();             //Init terminal Sync Info
-    terminalSyncInfo.setName("Q20");                                        //Set Name，mandatory
-    terminalSyncInfo.setType(SyncApi.SyncType.DEVICE);                      //Set Type [Application Info:1, Device Info: 2, Hardware Info: 3, Install History Info: 4]，mandatory
-    terminalSyncInfo.setRemarks("TEST");                                    //Set Remarks, Optional
-    terminalSyncInfo.setVersion("1.0");                                     //Set Version，Optional
-    terminalSyncInfo.setStatus("");                                         //Set Status，Optional
-    terminalSyncInfo.setSyncTime(System.currentTimeMillis());               //Set Sync Time，Optional
-    List<TerminalSyncInfo> terminalSyncInfoList = new ArrayList<TerminalSyncInfo>();
-    terminalSyncInfoList.add(terminalSyncInfo);
-    SyncApi syncApi = new SyncApi(apiUrl, appKey, appSecret, terminalSerialNo);
-    String result = syncApi.syncTerminalInfo(terminalSyncInfoList);
+## [Terminal APIs](docs/TERMINAL_API.md)
+
+## [PARAM APIs](docs/PARAM_API.md)
+
+## [SYNC APIs](docs/SYNC_API.md)
 
 ## License
 

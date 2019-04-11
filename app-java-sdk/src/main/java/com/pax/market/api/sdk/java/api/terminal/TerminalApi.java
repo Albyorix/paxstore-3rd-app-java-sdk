@@ -57,32 +57,36 @@ public class TerminalApi extends BaseApi {
 
     /**
      * Get terminal(s) geolocation by serial No. list.
-     *
-     * @param serialNoList
+     * @since v6.3
+     * @param serialNos
      * @return
      */
-    public SdkPageObject<TerminalLocation> getGeolocation(List<String> serialNoList) {
+    public SdkPageObject<TerminalLocation> getGeolocation(List<String> serialNos, int pageNo, int pageSize) {
         SdkRequest request = new SdkRequest(getGeolocationUrl);
         request.setRequestMethod(SdkRequest.RequestMethod.POST);
         request.addHeader(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON);
         TerminalSNsQueryRequest queryRequest = new TerminalSNsQueryRequest();
-        queryRequest.setSerialNos(serialNoList);
+        queryRequest.setSerialNos(serialNos);
+        queryRequest.setPageNo(pageNo);
+        queryRequest.setPageSize(pageSize);
         request.setRequestBody(new Gson().toJson(queryRequest, TerminalSNsQueryRequest.class));
         return JsonUtils.fromJson(call(request), new TypeToken<SdkPageObject<TerminalLocation>>(){}.getType());
     }
 
     /**
      * Get terminal(s) online status by serial No. list.
-     *
-     * @param serialNoList
+     * @since v6.3
+     * @param serialNos
      * @return
      */
-    public SdkPageObject<TerminalOnlineStatus> getOnlineStatus(List<String> serialNoList) {
+    public SdkPageObject<TerminalOnlineStatus> getOnlineStatus(List<String> serialNos, int pageNo, int pageSize) {
         SdkRequest request = new SdkRequest(getOnlineStatusUrl);
         request.setRequestMethod(SdkRequest.RequestMethod.POST);
         request.addHeader(Constants.CONTENT_TYPE, Constants.CONTENT_TYPE_JSON);
         TerminalSNsQueryRequest queryRequest = new TerminalSNsQueryRequest();
-        queryRequest.setSerialNos(serialNoList);
+        queryRequest.setSerialNos(serialNos);
+        queryRequest.setPageNo(pageNo);
+        queryRequest.setPageSize(pageSize);
         request.setRequestBody(new Gson().toJson(queryRequest, TerminalSNsQueryRequest.class));
         return JsonUtils.fromJson(call(request), new TypeToken<SdkPageObject<TerminalLocation>>(){}.getType());
     }
