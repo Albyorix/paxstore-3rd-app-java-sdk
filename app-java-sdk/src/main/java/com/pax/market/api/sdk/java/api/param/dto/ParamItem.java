@@ -1,26 +1,25 @@
 /*
- * *
- *     * ********************************************************************************
- *     * COPYRIGHT
- *     *               PAX TECHNOLOGY, Inc. PROPRIETARY INFORMATION
- *     *   This software is supplied under the terms of a license agreement or
- *     *   nondisclosure agreement with PAX  Technology, Inc. and may not be copied
- *     *   or disclosed except in accordance with the terms in that agreement.
- *     *
- *     *      Copyright (C) 2017 PAX Technology, Inc. All rights reserved.
- *     * ********************************************************************************
+ * ******************************************************************************
+ * COPYRIGHT
+ *               PAX TECHNOLOGY, Inc. PROPRIETARY INFORMATION
+ *   This software is supplied under the terms of a license agreement or
+ *   nondisclosure agreement with PAX  Technology, Inc. and may not be copied
+ *   or disclosed except in accordance with the terms in that agreement.
  *
+ *      Copyright (C) 2019 PAX Technology, Inc. All rights reserved.
+ * ******************************************************************************
  */
 
-package com.pax.market.api.sdk.java.base.dto;
+package com.pax.market.api.sdk.java.api.param.dto;
 
 import com.google.gson.annotations.SerializedName;
+import com.pax.market.api.sdk.java.base.dto.SdkObject;
 
 
 /**
  * Created by zcy on 2016/12/6 0006.
  */
-public class ParamObject extends SdkObject {
+public class ParamItem extends SdkObject {
 
     @SerializedName("actionId")
     private long actionId;
@@ -85,7 +84,7 @@ public class ParamObject extends SdkObject {
 
     @Override
     public String toString() {
-        return "ParamObject{" +
+        return "ParamItem{" +
                 "actionId=" + actionId +
                 ", appId=" + appId +
                 ", versionCode=" + versionCode +

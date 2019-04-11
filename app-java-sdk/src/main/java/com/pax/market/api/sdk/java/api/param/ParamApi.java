@@ -11,13 +11,12 @@
  */
 package com.pax.market.api.sdk.java.api.param;
 
+import com.pax.market.api.sdk.java.api.param.dto.ParamItem;
+import com.pax.market.api.sdk.java.api.param.dto.ParamList;
 import com.pax.market.api.sdk.java.base.api.BaseApi;
-import com.pax.market.api.sdk.java.base.client.DefaultClient;
 import com.pax.market.api.sdk.java.base.constant.Constants;
 import com.pax.market.api.sdk.java.base.constant.ResultCode;
 import com.pax.market.api.sdk.java.base.dto.DownloadResultObject;
-import com.pax.market.api.sdk.java.base.dto.ParamListObject;
-import com.pax.market.api.sdk.java.base.dto.ParamObject;
 import com.pax.market.api.sdk.java.base.dto.SdkObject;
 import com.pax.market.api.sdk.java.base.dto.UpdateActionObject;
 import com.pax.market.api.sdk.java.base.exception.ParseXMLException;
@@ -108,31 +107,31 @@ public class ParamApi extends BaseApi {
      * @param versionCode
      * @return
      */
-    public ParamListObject getParamDownloadList(String packageName, int versionCode){
+    public ParamList getParamDownloadList(String packageName, int versionCode){
         SdkRequest request = new SdkRequest(downloadParamUrl);
         request.addHeader(Constants.REQ_HEADER_SN, getTerminalSN());
         request.addRequestParam(REQ_PARAM_PACKAGE_NAME, packageName);
         request.addRequestParam(REQ_PARAM_VERSION_CODE, Integer.toString(versionCode));
-        return JsonUtils.fromJson(call(request), ParamListObject.class);
+        return JsonUtils.fromJson(call(request), ParamList.class);
     }
 
     /**
      * Download param files
      *
-     * @param paramObject  You can get ParamObject from getParamDownloadList();
+     * @param paramItem  You can get ParamItem from getParamDownloadList();
      * @param saveFilePath Path that param files will be saved.
      * @return
      */
-    public DownloadResultObject downloadParamFileOnly(ParamObject paramObject, String saveFilePath) {
-        SdkRequest request = new SdkRequest(paramObject.getDownloadUrl());
+    public DownloadResultObject downloadParamFileOnly(ParamItem paramItem, String saveFilePath) {
+        SdkRequest request = new SdkRequest(paramItem.getDownloadUrl());
         request.setSaveFilePath(saveFilePath);
         String execute = download(request);
         SdkObject sdkObject = JsonUtils.fromJson(execute, SdkObject.class);
 
         if (sdkObject.getBusinessCode() == ResultCode.SUCCESS.getCode()) {
             //compare md，if md is null, pass
-            if (paramObject.getMd() == null || paramObject.getMd().equals("")
-                    || paramObject.getMd().equals(Md5Utils.getFileMD5(new File(sdkObject.getMessage())))) {
+            if (paramItem.getMd() == null || paramItem.getMd().equals("")
+                    || paramItem.getMd().equals(Md5Utils.getFileMD5(new File(sdkObject.getMessage())))) {
                 logger.debug("download file md5 is correct");
                 //Unzip zipfile and delete it
                 boolean unzipResult = ZipUtil.unzip(sdkObject.getMessage());
@@ -142,7 +141,7 @@ public class ParamApi extends BaseApi {
                     sdkObject.setMessage(ERROR_UNZIP_FAILED);
                 } else {
                     //replace file
-                    boolean ifReplaceSuccess = ReplaceUtils.replaceParams(saveFilePath, paramObject.getParamVariables());
+                    boolean ifReplaceSuccess = ReplaceUtils.replaceParams(saveFilePath, paramItem.getParamVariables());
                     if (!ifReplaceSuccess) {
                         logger.info("replace paramVariables failed");
                         sdkObject.setBusinessCode(ResultCode.SDK_REPLACE_VARIABLES_FAILED.getCode());
@@ -213,26 +212,26 @@ public class ParamApi extends BaseApi {
         DownloadResultObject result = new DownloadResultObject();
         result.setParamSavePath(saveFilePath);
         //get paramList
-        ParamListObject paramListObject = getParamDownloadList(packageName, versionCode);
-        if (paramListObject.getBusinessCode() != ResultCode.SUCCESS.getCode()) {
-            result.setBusinessCode(paramListObject.getBusinessCode());
-            result.setMessage(paramListObject.getMessage());
+        ParamList paramList = getParamDownloadList(packageName, versionCode);
+        if (paramList.getBusinessCode() != ResultCode.SUCCESS.getCode()) {
+            result.setBusinessCode(paramList.getBusinessCode());
+            result.setMessage(paramList.getMessage());
             return result;
-        } else if (paramListObject.getTotalCount() == 0) {
+        } else if (paramList.getTotalCount() == 0) {
             result.setBusinessCode(-10);
             result.setMessage("No params to download");
             return result;
         }
 
         //update remarks only
-        List<UpdateActionObject> updateBatchBody = getUpdateBatchBody(paramListObject, REMARKS_PARAM_DOWNLOADING, ACT_STATUS_PENDING, CODE_NONE_ERROR);
+        List<UpdateActionObject> updateBatchBody = getUpdateBatchBody(paramList, REMARKS_PARAM_DOWNLOADING, ACT_STATUS_PENDING, CODE_NONE_ERROR);
         updateDownloadStatusBatch(updateBatchBody);
         //download each param
 
-        saveFilePath = saveFilePath + File.separator + paramListObject.getList().get(0).getActionId(); // use first actionId as temp folder name
+        saveFilePath = saveFilePath + File.separator + paramList.getList().get(0).getActionId(); // use first actionId as temp folder name
         String remarks = null;
-        for (ParamObject paramObject : paramListObject.getList()) {
-            SdkObject sdkObject = downloadParamFileOnly(paramObject, saveFilePath);
+        for (ParamItem paramItem : paramList.getList()) {
+            SdkObject sdkObject = downloadParamFileOnly(paramItem, saveFilePath);
             if (sdkObject.getBusinessCode() != ResultCode.SUCCESS.getCode()) {
                 result.setBusinessCode(sdkObject.getBusinessCode());
                 result.setMessage(sdkObject.getMessage());
@@ -248,9 +247,9 @@ public class ParamApi extends BaseApi {
         if (remarks != null) {
             // Since download failed, result of updating action is not concerned, just return the result of download failed reason
             FileUtils.delFolder(saveFilePath);
-            updateActionListByRemarks(paramListObject, remarks);
+            updateActionListByRemarks(paramList, remarks);
         } else {
-            SdkObject updateResultObj = updateActionListByRemarks(paramListObject, remarks);
+            SdkObject updateResultObj = updateActionListByRemarks(paramList, remarks);
             if (updateResultObj.getBusinessCode() != ResultCode.SUCCESS.getCode()) {
                 FileUtils.delFolder(saveFilePath);
                 result.setBusinessCode(updateResultObj.getBusinessCode());
@@ -266,23 +265,23 @@ public class ParamApi extends BaseApi {
     }
 
 
-    private SdkObject updateActionListByRemarks(ParamListObject paramListObject, String remarks) {
+    private SdkObject updateActionListByRemarks(ParamList paramList, String remarks) {
 
         List<UpdateActionObject> updateBatchList;
         if (remarks != null) {
-            updateBatchList = getUpdateBatchBody(paramListObject, remarks, ACT_STATUS_FAILED, CODE_DOWNLOAD_ERROR);
+            updateBatchList = getUpdateBatchBody(paramList, remarks, ACT_STATUS_FAILED, CODE_DOWNLOAD_ERROR);
         } else {
-            updateBatchList = getUpdateBatchBody(paramListObject, remarks, ACT_STATUS_SUCCESS, CODE_NONE_ERROR);
+            updateBatchList = getUpdateBatchBody(paramList, remarks, ACT_STATUS_SUCCESS, CODE_NONE_ERROR);
         }
         return updateDownloadStatusBatch(updateBatchList);
     }
 
-    private List<UpdateActionObject> getUpdateBatchBody(ParamListObject paramListObject, String remarks, int status, int errorCode) {
+    private List<UpdateActionObject> getUpdateBatchBody(ParamList paramList, String remarks, int status, int errorCode) {
         List<UpdateActionObject> updateActionObjectList = new ArrayList<UpdateActionObject>();
         String updateBatch;
-        for (ParamObject paramObject : paramListObject.getList()) {
+        for (ParamItem paramItem : paramList.getList()) {
             UpdateActionObject updateActionObject = new UpdateActionObject();
-            updateActionObject.setActionId(paramObject.getActionId());
+            updateActionObject.setActionId(paramItem.getActionId());
             updateActionObject.setStatus(status);
             updateActionObject.setErrorCode(errorCode);
             updateActionObject.setRemarks(remarks);

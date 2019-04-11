@@ -2,7 +2,7 @@ package com.pax.market.api.sdk.java.base.util;
 
 import com.google.gson.Gson;
 import com.pax.market.api.sdk.java.base.constant.Constants;
-import com.pax.market.api.sdk.java.base.dto.ParamsVariableObject;
+import com.pax.market.api.sdk.java.api.param.dto.ParamVariable;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class ReplaceUtils {
     private static final Logger logger = LoggerFactory.getLogger(ReplaceUtils.class.getSimpleName());
 
     public static boolean replaceParams(String filePath, String paramVariables) {
-        List<ParamsVariableObject> paramList = exchangeValues(paramVariables);
+        List<ParamVariable> paramList = exchangeValues(paramVariables);
 
         if (paramList!=null && !paramList.isEmpty()) {
             File dic = new File(filePath);
@@ -42,10 +42,10 @@ public class ReplaceUtils {
                             try {
                                 String fullFile = FileUtils.readFileToString(file);
                                 String replaceResult = fullFile;
-                                for (ParamsVariableObject paramsVariableObject : paramList) {
-                                    String key = escapeExprSpecialWord(paramsVariableObject.getKey());
-                                    String value = escapeXml(paramsVariableObject.getValue());
-                                    if(paramsVariableObject.getKey().matches("#\\{([A-Za-z0-9-_.]+)\\}")) {
+                                for (ParamVariable paramVariable : paramList) {
+                                    String key = escapeExprSpecialWord(paramVariable.getKey());
+                                    String value = escapeXml(paramVariable.getValue());
+                                    if(paramVariable.getKey().matches("#\\{([A-Za-z0-9-_.]+)\\}")) {
                                         replaceResult = replaceResult.replaceAll(String.format("(?i)%s", key), value);
                                     } else {
                                          replaceResult = replaceResult.replaceAll(
@@ -76,16 +76,16 @@ public class ReplaceUtils {
         return true;
     }
 
-    private static List<ParamsVariableObject> exchangeValues(String json) {
+    private static List<ParamVariable> exchangeValues(String json) {
         if (json != null) {
-            List<ParamsVariableObject> list = new ArrayList<ParamsVariableObject>();
+            List<ParamVariable> list = new ArrayList<ParamVariable>();
             Gson gson = new Gson();
             HashMap object = gson.fromJson(json, HashMap.class);
             if (object != null && object.size() > 0) {
                 Iterator iterator = object.entrySet().iterator();
                 while (iterator.hasNext()) {
                     Map.Entry entry = (Map.Entry) iterator.next();
-                    ParamsVariableObject dto = new ParamsVariableObject();
+                    ParamVariable dto = new ParamVariable();
                     dto.setKey((String) entry.getKey());
                     dto.setValue((String)entry.getValue());
                     list.add(dto);
