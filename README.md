@@ -36,9 +36,9 @@ public class Sample {
 
 ## [Terminal APIs](docs/TERMINAL_API.md)
 
-## [PARAM APIs](docs/PARAM_API.md)
+## [Param APIs](docs/PARAM_API.md)
 
-## [SYNC APIs](docs/SYNC_API.md)
+## [Sync APIs](docs/SYNC_API.md)
 
 ## License
 
