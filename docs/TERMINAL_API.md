@@ -25,6 +25,8 @@ public TerminalApi(String baseUrl, String appKey, String appSecret, String termi
 
 Allow third-party application or backend service to query terminal geolocation.
 
+Excluding terminal(s) which not installed this third-party application from result.
+
 **API**
 
 ```
@@ -95,6 +97,8 @@ Structure of class TerminalLocation
 ### Get online status
 
 Allow third-party application or backend service to query terminal online status.
+
+Excluding terminal(s) which not installed this third-party application from result.
 
 **API**
 
