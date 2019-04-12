@@ -7,8 +7,7 @@ All the terminal APIs are in the class *com.pax.market.api.sdk.java.api.terminal
 **Constructors of TerminalApi**
 
 ```
-public TerminalApi(String baseUrl, String appKey, String appSecret);        // For third-party backend service
-public TerminalApi(String baseUrl, String appKey, String appSecret, String termianlSN)      // For third-party application
+public TerminalApi(String baseUrl, String appKey, String appSecret);
 ```
 
 **Constructor parameters description**
